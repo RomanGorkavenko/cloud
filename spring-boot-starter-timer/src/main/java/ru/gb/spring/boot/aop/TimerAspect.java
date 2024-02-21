@@ -1,19 +1,21 @@
 package ru.gb.spring.boot.aop;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
 
 @Slf4j
 @Aspect
-@Component
+@RequiredArgsConstructor
 public class TimerAspect {
+
+    private final TimerProperties properties;
 
     @Pointcut("within(@ru.gb.spring.boot.aop.annotations.* *)")
     public void beansAnnotatedWith() {
@@ -43,14 +45,18 @@ public class TimerAspect {
             countdown.start();
             result = proceedingJoinPoint.proceed();
             countdown.stop();
-            log.error("{}-{} #({} ms)", className, methodName, countdown.getTotalTimeMillis());
+            doLog("{}-{} #({} ms)", className, methodName, countdown.getTotalTimeMillis());
         } catch (Exception e) {
             countdown.stop();
-            log.error("{}-{} #({} ms)", className, methodName, countdown.getTotalTimeMillis());
+            doLog("{}-{} #({} ms)", className, methodName, countdown.getTotalTimeMillis());
             throw e;
         }
 
         return result;
+    }
+
+    private void doLog(String text, Object... params) {
+        log.atLevel(properties.getLogLevel()).log(text, params);
     }
 
 }
