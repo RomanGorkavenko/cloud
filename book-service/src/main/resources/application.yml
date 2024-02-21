@@ -9,3 +9,8 @@ spring:
   application:
     name: book-service
 
+aspect:
+  timer:
+    enabled: false
+    log-level: trace
+
